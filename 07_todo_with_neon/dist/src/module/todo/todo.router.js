@@ -1,5 +1,11 @@
 import { Router } from "express";
-import { createTodoHandler, deleteTodoHandler, getAllTodosHandler, getSingleTodoHandler, updateTodoHandler, } from "./todo.controller.js";
+import {
+  createTodoHandler,
+  deleteTodoHandler,
+  getAllTodosHandler,
+  getSingleTodoHandler,
+  updateTodoHandler,
+} from "./todo.controller.js";
 const router = Router();
 router.get("/", getAllTodosHandler);
 router.get("/:id", getSingleTodoHandler);

@@ -1,5 +1,11 @@
 import { Router } from "express";
-import { registerUserHandler, loginUserHandler, getMeHandler, logoutUserHandler, refreshTokenHandler, } from "./auth.controller.js";
+import {
+  registerUserHandler,
+  loginUserHandler,
+  getMeHandler,
+  logoutUserHandler,
+  refreshTokenHandler,
+} from "./auth.controller.js";
 import { authenticate } from "../../shared/middleware/auth.middleware.js";
 const router = Router();
 router.post("/login", loginUserHandler);

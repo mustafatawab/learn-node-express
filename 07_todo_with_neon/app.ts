@@ -25,7 +25,7 @@ app.use(cookieParser());
 app.use(express.json());
 
 // CSRF Middleware should be registered after authentication middleware, so we can skip CSRF checks for public routes and apply it only to protected routes.
-app.use("/api" ,csrfMiddleware); 
+app.use("/api", csrfMiddleware);
 
 // registered before authenticate, so login/register don't require a token
 app.use("/api/auth", authRouter);
@@ -35,7 +35,6 @@ app.use(authenticate);
 
 // Todos Protected APIs
 app.use("/api/todos", todoRouter);
-
 
 // Whenever any middleware or route calls next(error), Express skips everything else and comes straight here.
 app.use((error: any, req: Request, res: Response, next: NextFunction) => {

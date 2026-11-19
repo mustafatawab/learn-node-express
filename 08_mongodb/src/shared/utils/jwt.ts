@@ -16,8 +16,6 @@ export const generateToken = (
   });
 };
 
-
-
 export const generateRefreshToken = (
   payload: TokenPayload,
   expiresIn: SignOptions["expiresIn"],
@@ -27,20 +25,18 @@ export const generateRefreshToken = (
   });
 };
 
-
 export const verifyAccessToken = (token: string) => {
-    try {
-        return jwt.verify(token, env.JWT_SECRET) as TokenPayload
-    } catch (error) {
-        return null
-    }
-}
+  try {
+    return jwt.verify(token, env.JWT_SECRET) as TokenPayload;
+  } catch (error) {
+    return null;
+  }
+};
 
 export const verifyRefreshToken = (token: string) => {
-    try {
-        return jwt.verify(token, env.REFRESH_TOKEN_SECRET) as TokenPayload
-    } catch (error) {
-        return null
-    }
-}
-
+  try {
+    return jwt.verify(token, env.REFRESH_TOKEN_SECRET) as TokenPayload;
+  } catch (error) {
+    return null;
+  }
+};

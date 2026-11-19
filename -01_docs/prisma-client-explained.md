@@ -9,22 +9,24 @@ This document explains the `src/lib/prisma.ts` file in simple terms for learning
 ```typescript
 import { PrismaClient } from "../generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { env } from "../config/env"
+import { env } from "../config/env";
 
-const globalForPrisma = global as unknown as { prisma : PrismaClient}
+const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
 const adapter = new PrismaPg({
-    connectionString : env.DATABASE_URL,
-    max : 20,
-    idleTimeoutMillis : 30000,
-    connectionTimeoutMillis : 5000,
-})
+  connectionString: env.DATABASE_URL,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 5000,
+});
 
-export const prisma = globalForPrisma.prisma || new PrismaClient({
-    adapter
-})
+export const prisma =
+  globalForPrisma.prisma ||
+  new PrismaClient({
+    adapter,
+  });
 
-if (process.env.NODE_ENV !== "production")  globalForPrisma.prisma = prisma
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 ```
 
 ---
@@ -41,18 +43,18 @@ import { env } from "../config/env";
 
 **What this does:**
 
-| Import | Purpose |
-|--------|---------|
+| Import         | Purpose                                                 |
+| -------------- | ------------------------------------------------------- |
 | `PrismaClient` | The main database client - your gateway to the database |
-| `PrismaPg` | A bridge that lets Prisma talk to PostgreSQL databases |
-| `env` | Your database URL from environment variables |
+| `PrismaPg`     | A bridge that lets Prisma talk to PostgreSQL databases  |
+| `env`          | Your database URL from environment variables            |
 
 ---
 
 ### Line 5: Global Cache Setup
 
 ```typescript
-const globalForPrisma = global as unknown as { prisma : PrismaClient}
+const globalForPrisma = global as unknown as { prisma: PrismaClient };
 ```
 
 **What this does:** Creates a "global variable" that survives hot reloads during development.
@@ -63,7 +65,7 @@ const globalForPrisma = global as unknown as { prisma : PrismaClient}
 - Memory leaks
 - Warnings in the console
 
-This line says: *"Check if a Prisma client already exists globally. If yes, reuse it. If no, create a new one."*
+This line says: _"Check if a Prisma client already exists globally. If yes, reuse it. If no, create a new one."_
 
 ---
 
@@ -71,37 +73,39 @@ This line says: *"Check if a Prisma client already exists globally. If yes, reus
 
 ```typescript
 const adapter = new PrismaPg({
-    connectionString : env.DATABASE_URL,
-    max : 20,
-    idleTimeoutMillis : 30000,
-    connectionTimeoutMillis : 5000,
-})
+  connectionString: env.DATABASE_URL,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 5000,
+});
 ```
 
 **What this does:** Configures **how** Prisma connects to your PostgreSQL database.
 
 **The settings explained:**
 
-| Setting | What it does |
-|---------|--------------|
-| `connectionString` | Your database URL - tells Prisma where your database lives |
-| `max: 20` | Maximum 20 connections at once (connection pool size) |
-| `idleTimeoutMillis: 30000` | Close unused connections after 30 seconds |
-| `connectionTimeoutMillis: 5000` | Wait max 5 seconds to get a connection before failing |
+| Setting                         | What it does                                               |
+| ------------------------------- | ---------------------------------------------------------- |
+| `connectionString`              | Your database URL - tells Prisma where your database lives |
+| `max: 20`                       | Maximum 20 connections at once (connection pool size)      |
+| `idleTimeoutMillis: 30000`      | Close unused connections after 30 seconds                  |
+| `connectionTimeoutMillis: 5000` | Wait max 5 seconds to get a connection before failing      |
 
 ---
 
 ### Lines 14-16: Create or Reuse Prisma Client
 
 ```typescript
-export const prisma = globalForPrisma.prisma || new PrismaClient({
-    adapter
-})
+export const prisma =
+  globalForPrisma.prisma ||
+  new PrismaClient({
+    adapter,
+  });
 ```
 
 **What this does:** The **singleton pattern** in action.
 
-**Translation:** *"Use the existing global Prisma client if it exists. Otherwise, create a brand new one with our adapter settings."*
+**Translation:** _"Use the existing global Prisma client if it exists. Otherwise, create a brand new one with our adapter settings."_
 
 This ensures your **entire app uses ONE Prisma instance**, not multiple.
 
@@ -110,7 +114,7 @@ This ensures your **entire app uses ONE Prisma instance**, not multiple.
 ### Line 18: Save to Global (Dev Only)
 
 ```typescript
-if (process.env.NODE_ENV !== "production")  globalForPrisma.prisma = prisma
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 ```
 
 **What this does:** Saves the Prisma client to the global variable **only in development**.
@@ -123,11 +127,11 @@ if (process.env.NODE_ENV !== "production")  globalForPrisma.prisma = prisma
 
 Think of your Prisma client like a **coffee machine**:
 
-| Scenario | Without `globalForPrisma` | With `globalForPrisma` |
-|----------|---------------------------|------------------------|
-| First run | Buy 1 coffee machine | Buy 1 coffee machine |
-| After hot reload | Buy another (now 2) | Reuse the existing one |
-| After 10 reloads | 11 machines! | Still 1 machine |
+| Scenario         | Without `globalForPrisma` | With `globalForPrisma` |
+| ---------------- | ------------------------- | ---------------------- |
+| First run        | Buy 1 coffee machine      | Buy 1 coffee machine   |
+| After hot reload | Buy another (now 2)       | Reuse the existing one |
+| After 10 reloads | 11 machines!              | Still 1 machine        |
 
 ---
 
@@ -181,12 +185,12 @@ const todos = await prisma.todo.findMany();
 
 ## Key Takeaways
 
-| Concept | Why It Matters |
-|---------|----------------|
-| **Singleton** | One DB connection shared everywhere |
-| **Global caching** | Prevents re-creation during dev (hot reload) |
-| **`$connect()` / `$disconnect()`** | Proper connection lifecycle |
-| **Middleware** | Add logging, error handling, query timing |
+| Concept                            | Why It Matters                               |
+| ---------------------------------- | -------------------------------------------- |
+| **Singleton**                      | One DB connection shared everywhere          |
+| **Global caching**                 | Prevents re-creation during dev (hot reload) |
+| **`$connect()` / `$disconnect()`** | Proper connection lifecycle                  |
+| **Middleware**                     | Add logging, error handling, query timing    |
 
 ---
 
@@ -199,4 +203,4 @@ const todos = await prisma.todo.findMany();
 
 ---
 
-*Generated for learning purposes - 009-todo-with-neon project*
+_Generated for learning purposes - 009-todo-with-neon project_

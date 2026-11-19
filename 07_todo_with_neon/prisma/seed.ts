@@ -3,50 +3,49 @@ import { prisma } from "../src/shared/lib/prisma.js";
 async function main() {
   console.log("Seeding database...");
 
-//   let users = await prisma.user.createMany({
-//     data: [
-//       {
-//         email: "user1@gmail.com",
-//         gender: "Male",
-//         name: "User 1",
-//         password: "password1",
-//       },
+  //   let users = await prisma.user.createMany({
+  //     data: [
+  //       {
+  //         email: "user1@gmail.com",
+  //         gender: "Male",
+  //         name: "User 1",
+  //         password: "password1",
+  //       },
 
-//       {
-//         email: "user2@gmail.com",
-//         gender: "Female",
-//         name: "User 2",
-//         password: "password2",
-//       },
-//     ],
-//   });
+  //       {
+  //         email: "user2@gmail.com",
+  //         gender: "Female",
+  //         name: "User 2",
+  //         password: "password2",
+  //       },
+  //     ],
+  //   });
 
-//   let user1 = await prisma.user.findUnique({
-//     where: { email: "user1@gmail.com" },
-//   });
+  //   let user1 = await prisma.user.findUnique({
+  //     where: { email: "user1@gmail.com" },
+  //   });
 
-//   let user2 = await prisma.user.findUnique({
-//     where: { email: "user2@gmail.com" },
-//   });
+  //   let user2 = await prisma.user.findUnique({
+  //     where: { email: "user2@gmail.com" },
+  //   });
 
+  let user1 = await prisma.user.create({
+    data: {
+      email: "user1@gmail.com",
+      name: "User 1",
+      gender: "Male",
+      password: "password1",
+    },
+  });
 
-let user1 = await prisma.user.create({
-    data : {
-        email: "user1@gmail.com",
-        name : "User 1",
-        gender : "Male",
-        password : "password1"
-    }
-})
-
-let user2 = await prisma.user.create({
-    data : {
-        email: "user2@gmail.com",
-        name : "User 2",
-        gender : "Female",
-        password : "password2"
-    }
-})
+  let user2 = await prisma.user.create({
+    data: {
+      email: "user2@gmail.com",
+      name: "User 2",
+      gender: "Female",
+      password: "password2",
+    },
+  });
 
   let todoCount = await prisma.todo.count();
 
@@ -84,12 +83,12 @@ let user2 = await prisma.user.create({
   console.log("\n Todos are \n ", todos);
 }
 
-
-
-main().then(() => {
-  console.log("Seeding completed.");
-  process.exit(0);
-}).catch((error) => {
-  console.error("Error seeding database", error);
-  process.exit(1);
-})
+main()
+  .then(() => {
+    console.log("Seeding completed.");
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error("Error seeding database", error);
+    process.exit(1);
+  });

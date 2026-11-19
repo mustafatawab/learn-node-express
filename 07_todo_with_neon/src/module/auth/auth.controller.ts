@@ -1,5 +1,11 @@
 import type { Request, Response, NextFunction } from "express";
-import { registerUser, loginUser, getMe, refreshToken, logoutUser } from "./auth.service.js";
+import {
+  registerUser,
+  loginUser,
+  getMe,
+  refreshToken,
+  logoutUser,
+} from "./auth.service.js";
 
 import { registerSchema, loginSchema } from "./auth.schema.js";
 import { AppError } from "../../shared/error/AppError.js";
@@ -46,7 +52,9 @@ export const loginUserHandler = async (
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    return res.status(200).json({ message: "User logged in successfully" , result });
+    return res
+      .status(200)
+      .json({ message: "User logged in successfully", result });
   } catch (error) {
     return next(error);
   }
@@ -90,13 +98,12 @@ export const logoutUserHandler = async (
 ) => {
   try {
     const userId = req.user?.userId;
-    
+
     if (!userId) {
       throw new AppError("Unauthorized - no user in request", 401);
     }
 
     await logoutUser(userId);
-
 
     res.clearCookie("accessToken");
     res.clearCookie("refreshToken");
@@ -120,7 +127,7 @@ export const refreshTokenHandler = async (
     if (!token) {
       throw new AppError("No refresh token provided", 400);
     }
-  
+
     const { newAccessToken, newRefreshToken } = await refreshToken(token);
 
     res.cookie("accessToken", newAccessToken, {
@@ -131,7 +138,7 @@ export const refreshTokenHandler = async (
     res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
-    }); 
+    });
 
     return res.status(200).json({ accessToken: newAccessToken });
   } catch (error) {

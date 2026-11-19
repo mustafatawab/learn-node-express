@@ -68,7 +68,6 @@ export const loginUser = async (input: LoginInput) => {
     },
   });
 
-
   return {
     accessToken,
     refreshToken,
@@ -89,54 +88,51 @@ export const getMe = async (userId: string) => {
 };
 
 export const refreshToken = async (token: string) => {
-  
-    const decoded = verifyRefreshToken(token);
+  const decoded = verifyRefreshToken(token);
 
-    if (!decoded) {
-      throw new AppError("Invalid refresh token", 401);
-    }
+  if (!decoded) {
+    throw new AppError("Invalid refresh token", 401);
+  }
 
-    const checkTokenInDb = await prisma.user.findFirst({
-      where: {
-        id: decoded.userId,
-        refreshToken: token,
-      },
-    });
+  const checkTokenInDb = await prisma.user.findFirst({
+    where: {
+      id: decoded.userId,
+      refreshToken: token,
+    },
+  });
 
-    if (!checkTokenInDb) {
-      await prisma.user.update({
-        where: { id: decoded.userId },
-        data: { refreshToken: null },
-      });
-      throw new AppError("Refresh token not found in the database", 401);
-    }
-
-    const payload = {
-      userId: decoded.userId,
-      email: decoded.email,
-    };
-
-    const newAccessToken = generateToken(payload, "15m");
-
-    const newRefreshToken = generateRefreshToken(payload, "7d");
-
+  if (!checkTokenInDb) {
     await prisma.user.update({
       where: { id: decoded.userId },
-      data: {
-        refreshToken: newRefreshToken,
-      },
+      data: { refreshToken: null },
     });
+    throw new AppError("Refresh token not found in the database", 401);
+  }
 
-    const csrfToken = generateCsrfToken();
+  const payload = {
+    userId: decoded.userId,
+    email: decoded.email,
+  };
 
-    return {
-      newAccessToken,
-      newRefreshToken,
-      csrfToken,
-    };
-  
+  const newAccessToken = generateToken(payload, "15m");
+
+  const newRefreshToken = generateRefreshToken(payload, "7d");
+
+  await prisma.user.update({
+    where: { id: decoded.userId },
+    data: {
+      refreshToken: newRefreshToken,
+    },
+  });
+
+  const csrfToken = generateCsrfToken();
+
+  return {
+    newAccessToken,
+    newRefreshToken,
+    csrfToken,
+  };
 };
-
 
 export const logoutUser = async (userId: string) => {
   await prisma.user.update({

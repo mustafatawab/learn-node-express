@@ -30,12 +30,12 @@ Middleware is just a function. Every route handler is also middleware. The only 
 ```typescript
 // Middleware — passes control forward
 app.use((req, res, next) => {
-  console.log('Request received:', req.method, req.path);
+  console.log("Request received:", req.method, req.path);
   next(); // passes control to the next function in the chain
 });
 
 // Route handler — ends the chain
-app.get('/users', (req, res) => {
+app.get("/users", (req, res) => {
   res.json({ users: [] }); // ends the response
 });
 ```
@@ -43,6 +43,7 @@ app.get('/users', (req, res) => {
 ### The Middleware Pipeline
 
 Express processes every request through a **pipeline** of functions registered in order. Each function either:
+
 - Calls `next()` → passes control forward
 - Calls `res.json()` / `res.send()` → ends the chain
 - Calls `next(error)` → jumps to error-handling middleware
@@ -61,13 +62,13 @@ your route handler     → res.json() → Response
 
 ```typescript
 // ✅ Correct — public routes before global middleware
-app.use('/api/auth', authRouter);   // login, register — no token needed
-app.use(authenticate);              // everything after requires auth
-app.use('/api/todos', todoRouter);  // protected
+app.use("/api/auth", authRouter); // login, register — no token needed
+app.use(authenticate); // everything after requires auth
+app.use("/api/todos", todoRouter); // protected
 
 // ❌ Wrong — auth blocks the login route itself
 app.use(authenticate);
-app.use('/api/auth', authRouter);   // login will be rejected 401
+app.use("/api/auth", authRouter); // login will be rejected 401
 ```
 
 ### Attaching Data to req
@@ -81,7 +82,7 @@ const authMiddleware = (req, res, next) => {
   next();
 };
 
-app.get('/dashboard', authMiddleware, (req, res) => {
+app.get("/dashboard", authMiddleware, (req, res) => {
   res.json({ user: req.user }); // req.user is populated
 });
 ```
@@ -97,10 +98,10 @@ app.get('/dashboard', authMiddleware, (req, res) => {
 
 ## 2. Authentication vs Authorization
 
-| Concept | Question | Example |
-|---|---|---|
-| **Authentication** | Who are you? | Verifying email + password, validating JWT |
-| **Authorization** | What can you do? | Admin can delete users, Staff cannot |
+| Concept            | Question         | Example                                    |
+| ------------------ | ---------------- | ------------------------------------------ |
+| **Authentication** | Who are you?     | Verifying email + password, validating JWT |
+| **Authorization**  | What can you do? | Admin can delete users, Staff cannot       |
 
 ```
 Request → authenticate (who are you?) → authorize (what can you do?) → route handler
@@ -112,17 +113,17 @@ Request → authenticate (who are you?) → authorize (what can you do?) → rou
 
 ### Why Two Tokens?
 
-| Token | Purpose | Expiry | Storage |
-|---|---|---|---|
-| `accessToken` | Proves identity on every request | Short (15 min) | HttpOnly cookie |
-| `refreshToken` | Gets a new accessToken when expired | Long (7 days) | HttpOnly cookie + Database |
+| Token          | Purpose                             | Expiry         | Storage                    |
+| -------------- | ----------------------------------- | -------------- | -------------------------- |
+| `accessToken`  | Proves identity on every request    | Short (15 min) | HttpOnly cookie            |
+| `refreshToken` | Gets a new accessToken when expired | Long (7 days)  | HttpOnly cookie + Database |
 
 Short-lived access tokens minimize damage if stolen. Refresh tokens enable seamless re-authentication without re-entering credentials.
 
 ### Generating Tokens
 
 ```typescript
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 
 interface TokenPayload {
   userId: string;
@@ -133,7 +134,10 @@ export const generateToken = (payload: TokenPayload, expiresIn: string) => {
   return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET!, { expiresIn });
 };
 
-export const generateRefreshToken = (payload: TokenPayload, expiresIn: string) => {
+export const generateRefreshToken = (
+  payload: TokenPayload,
+  expiresIn: string,
+) => {
   return jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET!, { expiresIn });
 };
 
@@ -176,7 +180,7 @@ TypeScript doesn't know about `req.user` by default. Fix this once with a declar
 
 ```typescript
 // src/types/express.d.ts
-import { JwtPayload } from 'jsonwebtoken';
+import { JwtPayload } from "jsonwebtoken";
 
 declare global {
   namespace Express {
@@ -194,29 +198,33 @@ declare global {
 
 ```typescript
 // src/shared/middleware/auth.middleware.ts
-import type { Request, Response, NextFunction } from 'express';
-import { AppError } from '../errors/AppError';
-import { verifyAccessToken } from '../utils/jwt';
+import type { Request, Response, NextFunction } from "express";
+import { AppError } from "../errors/AppError";
+import { verifyAccessToken } from "../utils/jwt";
 
-export const authenticate = (req: Request, res: Response, next: NextFunction) => {
+export const authenticate = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const accessToken = req.cookies.accessToken;
 
     if (!accessToken) {
-      throw new AppError('Authentication token is missing', 401);
+      throw new AppError("Authentication token is missing", 401);
     }
 
     const decoded = verifyAccessToken(accessToken);
 
     if (!decoded) {
-      throw new AppError('Invalid or expired token', 401);
+      throw new AppError("Invalid or expired token", 401);
     }
 
     req.user = decoded;
     next();
   } catch (error) {
     if (error instanceof AppError) return next(error);
-    next(new AppError('Unauthorized — invalid token', 401));
+    next(new AppError("Unauthorized — invalid token", 401));
   }
 };
 ```
@@ -240,7 +248,8 @@ export const registerUser = async (input: RegisterInput) => {
     where: { email: input.email },
   });
 
-  if (existingUser) throw new AppError('User with this email already exists', 400);
+  if (existingUser)
+    throw new AppError("User with this email already exists", 400);
 
   const hashedPassword = await hashPassword(input.password);
 
@@ -259,15 +268,15 @@ export const registerUser = async (input: RegisterInput) => {
 ```typescript
 export const loginUser = async (input: LoginInput) => {
   const user = await prisma.user.findUnique({ where: { email: input.email } });
-  if (!user) throw new AppError('Invalid email or password', 401);
+  if (!user) throw new AppError("Invalid email or password", 401);
 
   const isValid = await comparePasswords(input.password, user.password);
-  if (!isValid) throw new AppError('Invalid email or password', 401);
+  if (!isValid) throw new AppError("Invalid email or password", 401);
 
   const payload = { userId: user.id, email: user.email };
 
-  const accessToken = generateToken(payload, '15m');
-  const refreshToken = generateRefreshToken(payload, '7d');
+  const accessToken = generateToken(payload, "15m");
+  const refreshToken = generateRefreshToken(payload, "7d");
   const csrfToken = generateCsrfToken();
 
   // Store refresh token in DB for rotation & invalidation
@@ -283,36 +292,40 @@ export const loginUser = async (input: LoginInput) => {
 ### Login Controller — Setting Cookies
 
 ```typescript
-export const loginUserHandler = async (req: Request, res: Response, next: NextFunction) => {
+export const loginUserHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const validatedData = loginSchema.parse(req.body);
     const result = await loginUser(validatedData);
 
     // HttpOnly — JS cannot read these (XSS protection)
-    res.cookie('accessToken', result.accessToken, {
+    res.cookie("accessToken", result.accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
       maxAge: 15 * 60 * 1000, // 15 minutes — matches token expiry
     });
 
-    res.cookie('refreshToken', result.refreshToken, {
+    res.cookie("refreshToken", result.refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
     // Non-HttpOnly — frontend JS needs to read this for CSRF protection
-    res.cookie('csrfToken', result.csrfToken, {
+    res.cookie("csrfToken", result.csrfToken, {
       httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // matches refresh token
     });
 
     // Never expose tokens in response body
-    return res.status(200).json({ message: 'Logged in successfully' });
+    return res.status(200).json({ message: "Logged in successfully" });
   } catch (error) {
     return next(error);
   }
@@ -325,17 +338,21 @@ export const loginUserHandler = async (req: Request, res: Response, next: NextFu
 // Service — fetch fresh user data from DB
 export const getMe = async (userId: string) => {
   const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) throw new AppError('User not found', 404);
+  if (!user) throw new AppError("User not found", 404);
 
   const { password, refreshToken, ...safeUser } = user;
   return safeUser; // never return password or refreshToken
 };
 
 // Controller — uses req.user populated by authenticate middleware
-export const getMeHandler = async (req: Request, res: Response, next: NextFunction) => {
+export const getMeHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const userId = req.user?.userId;
-    if (!userId) throw new AppError('Unauthorized', 401);
+    if (!userId) throw new AppError("Unauthorized", 401);
 
     const result = await getMe(userId);
     return res.status(200).json({ success: true, data: result });
@@ -364,7 +381,7 @@ If an **already-rotated** token is presented, it could mean an attacker is using
 export const refreshToken = async (token: string) => {
   // 1. Verify JWT signature
   const decoded = verifyRefreshToken(token);
-  if (!decoded) throw new AppError('Invalid refresh token', 401);
+  if (!decoded) throw new AppError("Invalid refresh token", 401);
 
   // 2. Check token exists in DB (reuse detection)
   const user = await prisma.user.findFirst({
@@ -377,13 +394,16 @@ export const refreshToken = async (token: string) => {
       where: { id: decoded.userId },
       data: { refreshToken: null },
     });
-    throw new AppError('Refresh token reuse detected. Please login again.', 401);
+    throw new AppError(
+      "Refresh token reuse detected. Please login again.",
+      401,
+    );
   }
 
   // 3. Generate new tokens
   const payload = { userId: decoded.userId, email: decoded.email };
-  const newAccessToken = generateToken(payload, '15m');
-  const newRefreshToken = generateRefreshToken(payload, '7d');
+  const newAccessToken = generateToken(payload, "15m");
+  const newRefreshToken = generateRefreshToken(payload, "7d");
   const newCsrfToken = generateCsrfToken();
 
   // 4. Rotate — replace old with new in DB
@@ -399,29 +419,34 @@ export const refreshToken = async (token: string) => {
 ### Refresh Token Handler
 
 ```typescript
-export const refreshTokenHandler = async (req: Request, res: Response, next: NextFunction) => {
+export const refreshTokenHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const token = req.cookies.refreshToken;
-    if (!token) throw new AppError('Refresh token missing', 401);
+    if (!token) throw new AppError("Refresh token missing", 401);
 
-    const { newAccessToken, newRefreshToken, newCsrfToken } = await refreshToken(token);
+    const { newAccessToken, newRefreshToken, newCsrfToken } =
+      await refreshToken(token);
 
-    res.cookie('accessToken', newAccessToken, {
+    res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
       maxAge: 15 * 60 * 1000, // ✅ must match token expiry
     });
 
-    res.cookie('refreshToken', newRefreshToken, {
+    res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.cookie('csrfToken', newCsrfToken, {
+    res.cookie("csrfToken", newCsrfToken, {
       httpOnly: false,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    return res.status(200).json({ message: 'Tokens refreshed' });
+    return res.status(200).json({ message: "Tokens refreshed" });
   } catch (error) {
     return next(error);
   }
@@ -443,15 +468,15 @@ axios.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        await axios.post('/api/auth/refresh-token');
+        await axios.post("/api/auth/refresh-token");
         return axios(originalRequest); // retry original request
       } catch {
-        window.location.href = '/login'; // refresh failed, redirect to login
+        window.location.href = "/login"; // refresh failed, redirect to login
       }
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 ```
 
@@ -471,20 +496,24 @@ export const logoutUser = async (userId: string) => {
 };
 
 // Controller
-export const logoutUserHandler = async (req: Request, res: Response, next: NextFunction) => {
+export const logoutUserHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const userId = req.user?.userId;
-    if (!userId) throw new AppError('Unauthorized', 401);
+    if (!userId) throw new AppError("Unauthorized", 401);
 
     await logoutUser(userId);
 
-    res.clearCookie('accessToken');
-    res.clearCookie('refreshToken');
-    res.clearCookie('csrfToken');
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+    res.clearCookie("csrfToken");
 
     req.user = undefined;
 
-    return res.status(200).json({ message: 'Logged out successfully' });
+    return res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
     return next(error);
   }
@@ -495,22 +524,22 @@ export const logoutUserHandler = async (req: Request, res: Response, next: NextF
 
 Clearing cookies doesn't invalidate the access token itself — it's still cryptographically valid until it expires. If someone copied it before logout:
 
-| Approach | Complexity | Protection |
-|---|---|---|
-| Short expiry (15 min) | None | Limits damage window |
-| Redis blocklist | Medium | Full invalidation |
-| Database blocklist | Low | Full invalidation, slower |
+| Approach              | Complexity | Protection                |
+| --------------------- | ---------- | ------------------------- |
+| Short expiry (15 min) | None       | Limits damage window      |
+| Redis blocklist       | Medium     | Full invalidation         |
+| Database blocklist    | Low        | Full invalidation, slower |
 
 ### Redis Blocklist (Production Pattern)
 
 ```typescript
-import { createClient } from 'redis';
+import { createClient } from "redis";
 
 const redis = createClient({ url: process.env.REDIS_URL });
 
 // On logout — add token to blocklist
 export const blockToken = async (token: string, expirySeconds: number) => {
-  await redis.setEx(`blocklist:${token}`, expirySeconds, '1');
+  await redis.setEx(`blocklist:${token}`, expirySeconds, "1");
 };
 
 // In authenticate middleware — check blocklist
@@ -539,7 +568,7 @@ Cross-Site Request Forgery tricks the browser into making requests on behalf of 
 5. Bank sees valid cookie → processes the request 😈
 ```
 
-**The key insight:** `evil.com` can't read `mybank.com`'s cookies (domain scoping). But it can make the browser *use* them. The `evil.com` has this 
+**The key insight:** `evil.com` can't read `mybank.com`'s cookies (domain scoping). But it can make the browser _use_ them. The `evil.com` has this
 
 ```html
 <form action="https://yourapp.com/api/todos" method="POST">
@@ -549,12 +578,12 @@ Cross-Site Request Forgery tricks the browser into making requests on behalf of 
 <script>
   document.forms[0].submit(); // fires automatically on page load 😈
 </script>
-
 ```
 
 ### The Fix: Double Submit Cookie Pattern
 
 The server generates a CSRF token and sends it in two ways:
+
 1. A **non-HttpOnly cookie** (frontend JS can read it)
 2. Frontend must attach it to every state-changing request **header**
 
@@ -569,59 +598,69 @@ Header: X-CSRF-Token: abc123 ✅  Header: X-CSRF-Token: ???  ❌ (evil.com can't
 ### Generating the CSRF Token
 
 ```typescript
-import crypto from 'crypto';
+import crypto from "crypto";
 
 export const generateCsrfToken = (): string => {
-  return crypto.randomBytes(32).toString('hex'); // 64-char random string
+  return crypto.randomBytes(32).toString("hex"); // 64-char random string
 };
 ```
 
 ### CSRF Middleware
 
 ```typescript
-import crypto from 'crypto';
-import type { Request, Response, NextFunction } from 'express';
-import { AppError } from '../errors/AppError';
+import crypto from "crypto";
+import type { Request, Response, NextFunction } from "express";
+import { AppError } from "../errors/AppError";
 
 // GET, HEAD, OPTIONS are read-only — nothing to protect
-const SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS'];
+const SAFE_METHODS = ["GET", "HEAD", "OPTIONS"];
 
 // Routes that don't have a CSRF token yet (user not logged in)
 const CSRF_EXEMPT_PATHS = [
-  '/api/auth/login',
-  '/api/auth/register',
-  '/api/auth/forgot-password',
-  '/api/auth/reset-password',
-  '/api/auth/refresh-token',
+  "/api/auth/login",
+  "/api/auth/register",
+  "/api/auth/forgot-password",
+  "/api/auth/reset-password",
+  "/api/auth/refresh-token",
 ];
 
 // Safe path matching — prevents accidental exemption of similar routes
 const isCsrfExempt = (path: string): boolean => {
   return CSRF_EXEMPT_PATHS.some(
-    (exemptPath) => path === exemptPath || path.startsWith(exemptPath + '/')
+    (exemptPath) => path === exemptPath || path.startsWith(exemptPath + "/"),
   );
 };
 
-export const csrfMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const csrfMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   // 1. Skip read-only methods — they can't mutate data
   if (SAFE_METHODS.includes(req.method)) return next();
 
   // 2. Skip public routes — user hasn't logged in yet, no token exists
-  const fullPath = req.originalUrl.split('?')[0];
+  const fullPath = req.originalUrl.split("?")[0];
   if (isCsrfExempt(fullPath)) return next();
 
   // 3. Extract tokens from both locations
-  const cookieToken = req.cookies['csrfToken'];
-  const headerToken = req.headers['x-csrf-token'] as string;
+  const cookieToken = req.cookies["csrfToken"];
+  const headerToken = req.headers["x-csrf-token"] as string;
 
   // 4. Both must be present
   if (!cookieToken || !headerToken) {
-    return res.status(403).json({ success: false, message: 'CSRF token missing' });
+    return res
+      .status(403)
+      .json({ success: false, message: "CSRF token missing" });
   }
 
   // 5. Timing-safe comparison — prevents timing attacks
-  if (!crypto.timingSafeEqual(Buffer.from(cookieToken), Buffer.from(headerToken))) {
-    return res.status(403).json({ success: false, message: 'Invalid CSRF token' });
+  if (
+    !crypto.timingSafeEqual(Buffer.from(cookieToken), Buffer.from(headerToken))
+  ) {
+    return res
+      .status(403)
+      .json({ success: false, message: "Invalid CSRF token" });
   }
 
   next();
@@ -666,20 +705,22 @@ app.use('/api/todos', todoRouter);  // all protected ✅
 ```typescript
 // Read the CSRF token from the non-HttpOnly cookie
 const getCsrfToken = (): string => {
-  return document.cookie
-    .split('; ')
-    .find(row => row.startsWith('csrfToken='))
-    ?.split('=')[1] || '';
+  return (
+    document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("csrfToken="))
+      ?.split("=")[1] || ""
+  );
 };
 
 // Attach to every state-changing request
-fetch('/api/todos', {
-  method: 'POST',
+fetch("/api/todos", {
+  method: "POST",
   headers: {
-    'Content-Type': 'application/json',
-    'X-CSRF-Token': getCsrfToken(), // ✅
+    "Content-Type": "application/json",
+    "X-CSRF-Token": getCsrfToken(), // ✅
   },
-  body: JSON.stringify({ title: 'New todo' }),
+  body: JSON.stringify({ title: "New todo" }),
 });
 ```
 
@@ -721,12 +762,12 @@ src/
 
 Each layer has one clear job:
 
-| Layer | Knows about | Does NOT know about |
-|---|---|---|
-| Router | URLs, HTTP verbs | Business logic, DB |
-| Controller | `req`, `res` | DB queries |
-| Service | Business rules | `req`, `res`, HTTP |
-| Repository/Prisma | Database | Everything else |
+| Layer             | Knows about      | Does NOT know about |
+| ----------------- | ---------------- | ------------------- |
+| Router            | URLs, HTTP verbs | Business logic, DB  |
+| Controller        | `req`, `res`     | DB queries          |
+| Service           | Business rules   | `req`, `res`, HTTP  |
+| Repository/Prisma | Database         | Everything else     |
 
 This means each layer can be tested independently and changed without affecting the others.
 
@@ -734,13 +775,13 @@ This means each layer can be tested independently and changed without affecting 
 
 ```typescript
 // src/shared/lib/prisma.ts
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
 export const prisma = globalForPrisma.prisma ?? new PrismaClient();
 
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
 }
 ```
@@ -758,10 +799,10 @@ Never create a `new PrismaClient()` in every file — each instance opens its ow
 export class AppError extends Error {
   constructor(
     public message: string,
-    public statusCode: number
+    public statusCode: number,
   ) {
     super(message);
-    this.name = 'AppError';
+    this.name = "AppError";
     Error.captureStackTrace(this, this.constructor);
   }
 }
@@ -783,19 +824,19 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   }
 
   // Zod validation errors
-  if (err.name === 'ZodError' || err.issues) {
+  if (err.name === "ZodError" || err.issues) {
     return res.status(422).json({
       success: false,
-      message: 'Validation failed',
+      message: "Validation failed",
       errors: err.errors || err.issues,
     });
   }
 
   // Unknown errors — don't leak details to client
-  console.error('Unexpected error:', err);
+  console.error("Unexpected error:", err);
   return res.status(500).json({
     success: false,
-    message: 'Internal server error',
+    message: "Internal server error",
   });
 });
 ```
@@ -814,7 +855,7 @@ try {
 }
 
 // Or throw AppError — caught by try/catch above
-throw new AppError('Not found', 404);
+throw new AppError("Not found", 404);
 ```
 
 ---
@@ -824,33 +865,33 @@ throw new AppError('Not found', 404);
 ### Cookie Options Explained
 
 ```typescript
-res.cookie('accessToken', token, {
-  httpOnly: true,       // JS cannot read — prevents XSS theft
-  secure: true,         // HTTPS only — never sent over HTTP
-  sameSite: 'strict',   // Never sent cross-site — CSRF protection
+res.cookie("accessToken", token, {
+  httpOnly: true, // JS cannot read — prevents XSS theft
+  secure: true, // HTTPS only — never sent over HTTP
+  sameSite: "strict", // Never sent cross-site — CSRF protection
   maxAge: 15 * 60 * 1000, // Must match token expiry (milliseconds)
 });
 ```
 
 ### Cookie Comparison
 
-| Option | `accessToken` | `refreshToken` | `csrfToken` |
-|---|---|---|---|
-| `httpOnly` | `true` | `true` | `false` (JS must read it) |
-| `secure` | `true` (prod) | `true` (prod) | `true` (prod) |
-| `sameSite` | `strict` | `strict` | `strict` |
-| `maxAge` | 15 min | 7 days | 7 days |
+| Option     | `accessToken` | `refreshToken` | `csrfToken`               |
+| ---------- | ------------- | -------------- | ------------------------- |
+| `httpOnly` | `true`        | `true`         | `false` (JS must read it) |
+| `secure`   | `true` (prod) | `true` (prod)  | `true` (prod)             |
+| `sameSite` | `strict`      | `strict`       | `strict`                  |
+| `maxAge`   | 15 min        | 7 days         | 7 days                    |
 
 ### maxAge Must Match Token Expiry
 
 ```typescript
 // ❌ Mismatch — token expires in 15 min, cookie lives 1 day
-const accessToken = generateToken(payload, '15m');
-res.cookie('accessToken', accessToken, { maxAge: 24 * 60 * 60 * 1000 });
+const accessToken = generateToken(payload, "15m");
+res.cookie("accessToken", accessToken, { maxAge: 24 * 60 * 60 * 1000 });
 
 // ✅ Correct — both expire at the same time
-const accessToken = generateToken(payload, '15m');
-res.cookie('accessToken', accessToken, { maxAge: 15 * 60 * 1000 });
+const accessToken = generateToken(payload, "15m");
+res.cookie("accessToken", accessToken, { maxAge: 15 * 60 * 1000 });
 ```
 
 ---
@@ -896,11 +937,11 @@ res.cookie('accessToken', accessToken, { maxAge: 15 * 60 * 1000 });
 app.use(express.json());
 app.use(cors({ credentials: true, origin: process.env.FRONTEND_URL }));
 app.use(cookieParser());
-app.use('/api', csrfMiddleware);   // 1. CSRF (exempt list handles public routes)
-app.use('/api/auth', authRouter);  // 2. Public auth routes
-app.use(authenticate);             // 3. Global auth protection
-app.use('/api/...', otherRouters); // 4. Protected routes
-app.use(errorHandler);             // 5. Always last
+app.use("/api", csrfMiddleware); // 1. CSRF (exempt list handles public routes)
+app.use("/api/auth", authRouter); // 2. Public auth routes
+app.use(authenticate); // 3. Global auth protection
+app.use("/api/...", otherRouters); // 4. Protected routes
+app.use(errorHandler); // 5. Always last
 ```
 
 ---
@@ -909,28 +950,28 @@ app.use(errorHandler);             // 5. Always last
 
 ### HTTP Status Codes for Auth
 
-| Status | Meaning | When to use |
-|---|---|---|
-| `200` | OK | Successful login, logout, refresh |
-| `201` | Created | Successful registration |
-| `400` | Bad Request | Invalid input, missing fields |
-| `401` | Unauthorized | Missing/invalid/expired token |
-| `403` | Forbidden | Valid token, insufficient permissions |
-| `422` | Unprocessable Entity | Validation errors (Zod) |
-| `500` | Internal Server Error | Unexpected errors |
+| Status | Meaning               | When to use                           |
+| ------ | --------------------- | ------------------------------------- |
+| `200`  | OK                    | Successful login, logout, refresh     |
+| `201`  | Created               | Successful registration               |
+| `400`  | Bad Request           | Invalid input, missing fields         |
+| `401`  | Unauthorized          | Missing/invalid/expired token         |
+| `403`  | Forbidden             | Valid token, insufficient permissions |
+| `422`  | Unprocessable Entity  | Validation errors (Zod)               |
+| `500`  | Internal Server Error | Unexpected errors                     |
 
 ### Common Mistakes
 
-| Mistake | Fix |
-|---|---|
-| Returning tokens in response body | Use HttpOnly cookies only |
-| `maxAge` mismatch between token and cookie | Always match them |
-| Using `===` to compare tokens | Use `crypto.timingSafeEqual` |
-| Single error message for wrong email vs wrong password | Use same message — prevents user enumeration |
-| Using `findFirst` on unique fields | Use `findUnique` — faster and semantically correct |
-| Storing all user data in JWT | Store only `userId` and `email` |
-| Global auth middleware before login route | Place public routes before global middleware |
+| Mistake                                                | Fix                                                |
+| ------------------------------------------------------ | -------------------------------------------------- |
+| Returning tokens in response body                      | Use HttpOnly cookies only                          |
+| `maxAge` mismatch between token and cookie             | Always match them                                  |
+| Using `===` to compare tokens                          | Use `crypto.timingSafeEqual`                       |
+| Single error message for wrong email vs wrong password | Use same message — prevents user enumeration       |
+| Using `findFirst` on unique fields                     | Use `findUnique` — faster and semantically correct |
+| Storing all user data in JWT                           | Store only `userId` and `email`                    |
+| Global auth middleware before login route              | Place public routes before global middleware       |
 
 ---
 
-*Built during a learning session focused on Node.js, Express, TypeScript, and Prisma.*
+_Built during a learning session focused on Node.js, Express, TypeScript, and Prisma._

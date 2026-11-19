@@ -2,8 +2,7 @@ import type { TodoCreateInput, TodoUpdateInput } from "./todo.schema.js";
 import { prisma } from "../../shared/lib/prisma.js";
 import { AppError } from "../../shared/error/AppError.js";
 
-
-export const createTodo = async (input: TodoCreateInput , userId : string) => {
+export const createTodo = async (input: TodoCreateInput, userId: string) => {
   const todo = await prisma.todo.create({
     data: {
       userId,
@@ -16,25 +15,28 @@ export const createTodo = async (input: TodoCreateInput , userId : string) => {
   return todo;
 };
 
-export const getTodos = async (userId : string) => {
+export const getTodos = async (userId: string) => {
   const todos = await prisma.todo.findMany({
-    where : { userId }
+    where: { userId },
   });
 
-  
-  return todos
+  return todos;
 };
 
-export const getSingleTodo = async (id: string , userId : string) => {
+export const getSingleTodo = async (id: string, userId: string) => {
   const todo = await prisma.todo.findUnique({
-    where: { id , userId },
+    where: { id, userId },
   });
   return todo;
 };
 
-export const updateTodo = async (id: string, userId: string, input: TodoUpdateInput) => {
+export const updateTodo = async (
+  id: string,
+  userId: string,
+  input: TodoUpdateInput,
+) => {
   const existingTodo = await prisma.todo.findUnique({
-    where: { id , userId },
+    where: { id, userId },
   });
 
   if (!existingTodo) throw new Error("Todo not found");
@@ -58,9 +60,9 @@ export const updateTodo = async (id: string, userId: string, input: TodoUpdateIn
   return todo;
 };
 
-export const deleteTodo = async (id: string , userId : string) => {
+export const deleteTodo = async (id: string, userId: string) => {
   const existingTodo = await prisma.todo.findUnique({
-    where: { id, userId},
+    where: { id, userId },
   });
 
   if (!existingTodo) throw new AppError("Todo not found", 404);
@@ -68,7 +70,6 @@ export const deleteTodo = async (id: string , userId : string) => {
   const deletedTodo = await prisma.todo.delete({
     where: { id: id },
   });
-  
 
   return deletedTodo;
 };

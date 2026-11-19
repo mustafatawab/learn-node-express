@@ -1,9 +1,9 @@
-
 # Node.js & Express.js - Learning Notes
 
 ## Prerequisites
 
 Before starting, you should know:
+
 - ✅ JavaScript basics (variables, functions, async/await)
 - ✅ How to use the terminal/command line
 - ✅ JSON format
@@ -13,27 +13,30 @@ Before starting, you should know:
 **Node.js** lets you run JavaScript on your computer/server, not just in the browser.
 
 Think of it like this:
+
 - **Browser JavaScript** = Controls what you see on a webpage
 - **Node.js** = Controls the server, files, databases
 
 ### Quick Comparison
 
-| Feature | Browser JS | Node.js |
-|---------|-----------|---------|
-| Can access DOM? | ✅ Yes | ❌ No |
-| Can read files? | ❌ No | ✅ Yes |
-| Can make servers? | ❌ No | ✅ Yes |
-| Has `fetch()`? | ✅ Yes | ✅ Yes (built-in) |
+| Feature           | Browser JS | Node.js           |
+| ----------------- | ---------- | ----------------- |
+| Can access DOM?   | ✅ Yes     | ❌ No             |
+| Can read files?   | ❌ No      | ✅ Yes            |
+| Can make servers? | ❌ No      | ✅ Yes            |
+| Has `fetch()`?    | ✅ Yes     | ✅ Yes (built-in) |
 
 ## Creating a Node.js Project
 
 ### Step 1: Create a folder
+
 ```bash
 mkdir my-project
 cd my-project
 ```
 
 ### Step 2: Initialize Node.js
+
 ```bash
 npm init -y
 ```
@@ -41,12 +44,15 @@ npm init -y
 This creates `package.json` - a file that tracks your project settings and dependencies.
 
 ### Step 3: Run JavaScript
+
 Create `index.js`:
+
 ```javascript
 console.log("Hello from Node.js!");
 ```
 
 Run it:
+
 ```bash
 node index.js
 ```
@@ -56,6 +62,7 @@ node index.js
 **Express** is a framework that makes creating web servers easier.
 
 Without Express:
+
 ```javascript
 // Using native Node.js http module (verbose!)
 import { createServer } from "node:http";
@@ -70,6 +77,7 @@ server.listen(3000);
 ```
 
 With Express:
+
 ```javascript
 import express from "express";
 const app = express();
@@ -85,11 +93,13 @@ Much cleaner!
 ## Creating an Express Project
 
 ### Step 1: Initialize project
+
 ```bash
 npm init -y
 ```
 
 ### Step 2: Install Express
+
 ```bash
 npm install express
 ```
@@ -97,7 +107,9 @@ npm install express
 This downloads Express and saves it in `node_modules/`.
 
 ### Step 3: Create server file
+
 `index.js`:
+
 ```javascript
 import express from "express";
 const app = express();
@@ -114,7 +126,9 @@ app.listen(PORT, () => {
 ```
 
 ### Step 4: Add "type": "module" to package.json
+
 Your `package.json` should look like:
+
 ```json
 {
   "name": "my-project",
@@ -129,6 +143,7 @@ Your `package.json` should look like:
 The `"type": "module"` lets you use `import` instead of `require()`.
 
 ### Step 5: Run it
+
 ```bash
 node index.js
 ```
@@ -138,25 +153,27 @@ Then open `http://localhost:3000` in your browser!
 ## Basic Express Concepts
 
 ### Request (req) Object
+
 Information about the incoming request:
 
-| Property | What It Is |
-|----------|-----------|
-| `req.method` | HTTP method: GET, POST, PUT, DELETE |
-| `req.path` | URL path: "/", "/about", etc. |
-| `req.params` | URL parameters: `/user/:id` → `req.params.id` |
-| `req.query` | Query string: `?name=john` → `req.query.name` |
-| `req.body` | Request body (for POST requests) |
-| `req.headers` | HTTP headers |
+| Property      | What It Is                                    |
+| ------------- | --------------------------------------------- |
+| `req.method`  | HTTP method: GET, POST, PUT, DELETE           |
+| `req.path`    | URL path: "/", "/about", etc.                 |
+| `req.params`  | URL parameters: `/user/:id` → `req.params.id` |
+| `req.query`   | Query string: `?name=john` → `req.query.name` |
+| `req.body`    | Request body (for POST requests)              |
+| `req.headers` | HTTP headers                                  |
 
 ### Response (res) Object
+
 Methods to send responses:
 
-| Method | What It Does |
-|--------|-------------|
-| `res.send("text")` | Sends text or HTML |
-| `res.json({ data })` | Sends JSON response |
-| `res.status(404)` | Sets HTTP status code |
+| Method                 | What It Does             |
+| ---------------------- | ------------------------ |
+| `res.send("text")`     | Sends text or HTML       |
+| `res.json({ data })`   | Sends JSON response      |
+| `res.status(404)`      | Sets HTTP status code    |
 | `res.redirect("/url")` | Redirects to another URL |
 
 ### Route Examples
@@ -250,11 +267,11 @@ Like a **restaurant visit**:
 
 ## Common Built-in Middleware
 
-| Middleware | What It Does |
-|------------|--------------|
-| `express.json()` | Reads JSON from request body |
-| `express.static()` | Serves files (images, CSS, JS) |
-| `express.urlencoded()` | Reads form data |
+| Middleware             | What It Does                   |
+| ---------------------- | ------------------------------ |
+| `express.json()`       | Reads JSON from request body   |
+| `express.static()`     | Serves files (images, CSS, JS) |
+| `express.urlencoded()` | Reads form data                |
 
 ## Attaching Data to Request
 
@@ -307,5 +324,5 @@ curl http://localhost:3000/
 
 ---
 
-*Learning Progress: 007 - Middleware Deep Dive*
-*Folder: /Users/yasirhayat/workspace/learn-nodejs/007*
+_Learning Progress: 007 - Middleware Deep Dive_
+_Folder: /Users/yasirhayat/workspace/learn-nodejs/007_

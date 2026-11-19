@@ -31,19 +31,20 @@ Complete step-by-step guide to integrate Neon (Serverless PostgreSQL) with Node.
 
 ### Why Neon over traditional Postgres?
 
-| Feature | Traditional Postgres | Neon |
-|---------|---------------------|------|
-| Setup | Install/configure | Instant, cloud-based |
-| Scaling | Manual | Automatic |
-| Connection Pooling | Manual setup | Built-in |
-| Branching | Complex | One-click |
-| Cost | Server costs | Free tier available |
+| Feature            | Traditional Postgres | Neon                 |
+| ------------------ | -------------------- | -------------------- |
+| Setup              | Install/configure    | Instant, cloud-based |
+| Scaling            | Manual               | Automatic            |
+| Connection Pooling | Manual setup         | Built-in             |
+| Branching          | Complex              | One-click            |
+| Cost               | Server costs         | Free tier available  |
 
 ---
 
 ## Prerequisites
 
 Before starting:
+
 - ✅ Node.js installed
 - ✅ Basic Express knowledge
 - ✅ Understanding of SQL (basics)
@@ -93,6 +94,7 @@ npm install dotenv
 ### What is @neondatabase/serverless?
 
 This is Neon's official driver. It:
+
 - Handles connection pooling automatically
 - Works with serverless environments (Vercel, AWS Lambda)
 - Uses WebSocket protocol for better performance
@@ -132,8 +134,8 @@ node_modules/
 Create `db.js`:
 
 ```javascript
-import { neon } from '@neondatabase/serverless';
-import dotenv from 'dotenv';
+import { neon } from "@neondatabase/serverless";
+import dotenv from "dotenv";
 
 // Load environment variables
 dotenv.config();
@@ -145,10 +147,10 @@ const sql = neon(process.env.DATABASE_URL);
 async function testConnection() {
   try {
     const result = await sql`SELECT version()`;
-    console.log('✅ Database connected!');
-    console.log('PostgreSQL version:', result[0].version);
+    console.log("✅ Database connected!");
+    console.log("PostgreSQL version:", result[0].version);
   } catch (error) {
-    console.error('❌ Database connection failed:', error.message);
+    console.error("❌ Database connection failed:", error.message);
   }
 }
 
@@ -162,17 +164,19 @@ export default sql;
 In `index.js`, add at the top:
 
 ```javascript
-import sql from './db.js';
+import sql from "./db.js";
 ```
 
 ### 4.3 Test the connection
 
 Run your server:
+
 ```bash
 node index.js
 ```
 
 You should see:
+
 ```
 ✅ Database connected!
 PostgreSQL version: PostgreSQL 15.x ...
@@ -200,9 +204,9 @@ async function createTables() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
-    console.log('✅ Tables created!');
+    console.log("✅ Tables created!");
   } catch (error) {
-    console.error('❌ Failed to create tables:', error.message);
+    console.error("❌ Failed to create tables:", error.message);
   }
 }
 
@@ -212,15 +216,15 @@ createTables();
 
 ### 5.2 Common Data Types
 
-| Type | Use For | Example |
-|------|---------|---------|
-| `SERIAL` | Auto-increment ID | `id SERIAL PRIMARY KEY` |
-| `VARCHAR(n)` | Short text | `name VARCHAR(100)` |
-| `TEXT` | Long text | `description TEXT` |
-| `INTEGER` | Whole numbers | `age INTEGER` |
-| `BOOLEAN` | True/False | `is_active BOOLEAN` |
-| `TIMESTAMP` | Date & time | `created_at TIMESTAMP` |
-| `JSONB` | JSON data | `metadata JSONB` |
+| Type         | Use For           | Example                 |
+| ------------ | ----------------- | ----------------------- |
+| `SERIAL`     | Auto-increment ID | `id SERIAL PRIMARY KEY` |
+| `VARCHAR(n)` | Short text        | `name VARCHAR(100)`     |
+| `TEXT`       | Long text         | `description TEXT`      |
+| `INTEGER`    | Whole numbers     | `age INTEGER`           |
+| `BOOLEAN`    | True/False        | `is_active BOOLEAN`     |
+| `TIMESTAMP`  | Date & time       | `created_at TIMESTAMP`  |
+| `JSONB`      | JSON data         | `metadata JSONB`        |
 
 ---
 
@@ -240,8 +244,8 @@ async function createUser(name, email) {
 }
 
 // Usage
-const newUser = await createUser('Mustafa', 'mustafa@example.com');
-console.log('Created:', newUser);
+const newUser = await createUser("Mustafa", "mustafa@example.com");
+console.log("Created:", newUser);
 ```
 
 **Note:** The `sql` function uses tagged template literals. The `${}` syntax is SAFE - it prevents SQL injection!
@@ -283,8 +287,8 @@ async function updateUser(id, updates) {
 
 // Usage
 const updated = await updateUser(1, {
-  name: 'Mustafa Tawab',
-  email: 'newemail@example.com'
+  name: "Mustafa Tawab",
+  email: "newemail@example.com",
 });
 ```
 
@@ -308,13 +312,13 @@ async function deleteUser(id) {
 ### 7.1 Create a Routes file: `routes/users.js`
 
 ```javascript
-import express from 'express';
-import sql from '../db.js';
+import express from "express";
+import sql from "../db.js";
 
 const router = express.Router();
 
 // GET all users
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const users = await sql`SELECT * FROM users`;
     res.json({ success: true, data: users });
@@ -324,11 +328,11 @@ router.get('/', async (req, res) => {
 });
 
 // GET single user
-router.get('/:id', async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     const users = await sql`SELECT * FROM users WHERE id = ${req.params.id}`;
     if (users.length === 0) {
-      return res.status(404).json({ success: false, error: 'User not found' });
+      return res.status(404).json({ success: false, error: "User not found" });
     }
     res.json({ success: true, data: users[0] });
   } catch (error) {
@@ -337,16 +341,16 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST create user
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const { name, email } = req.body;
-    
+
     const result = await sql`
       INSERT INTO users (name, email)
       VALUES (${name}, ${email})
       RETURNING *
     `;
-    
+
     res.status(201).json({ success: true, data: result[0] });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -354,21 +358,21 @@ router.post('/', async (req, res) => {
 });
 
 // PUT update user
-router.put('/:id', async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
     const { name, email } = req.body;
-    
+
     const result = await sql`
       UPDATE users
       SET name = ${name}, email = ${email}
       WHERE id = ${req.params.id}
       RETURNING *
     `;
-    
+
     if (result.length === 0) {
-      return res.status(404).json({ success: false, error: 'User not found' });
+      return res.status(404).json({ success: false, error: "User not found" });
     }
-    
+
     res.json({ success: true, data: result[0] });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -376,19 +380,19 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE user
-router.delete('/:id', async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     const result = await sql`
       DELETE FROM users
       WHERE id = ${req.params.id}
       RETURNING *
     `;
-    
+
     if (result.length === 0) {
-      return res.status(404).json({ success: false, error: 'User not found' });
+      return res.status(404).json({ success: false, error: "User not found" });
     }
-    
-    res.json({ success: true, message: 'User deleted' });
+
+    res.json({ success: true, message: "User deleted" });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -400,9 +404,9 @@ export default router;
 ### 7.2 Update main index.js
 
 ```javascript
-import express from 'express';
-import sql from './db.js'; // This imports and tests connection
-import usersRouter from './routes/users.js';
+import express from "express";
+import sql from "./db.js"; // This imports and tests connection
+import usersRouter from "./routes/users.js";
 
 const app = express();
 
@@ -410,15 +414,15 @@ const app = express();
 app.use(express.json());
 
 // Routes
-app.use('/users', usersRouter);
+app.use("/users", usersRouter);
 
 // Test route
-app.get('/', (req, res) => {
-  res.json({ message: 'API is working!' });
+app.get("/", (req, res) => {
+  res.json({ message: "API is working!" });
 });
 
 app.listen(8000, () => {
-  console.log('Server running on port 8000');
+  console.log("Server running on port 8000");
 });
 ```
 
@@ -454,6 +458,7 @@ curl -X DELETE http://localhost:8000/users/1
 **Cause:** Wrong connection string
 
 **Fix:**
+
 - Double-check your DATABASE_URL
 - Make sure `sslmode=require` is included
 - Verify the database exists in Neon dashboard
@@ -463,6 +468,7 @@ curl -X DELETE http://localhost:8000/users/1
 **Cause:** Tables not created
 
 **Fix:**
+
 - Run the createTables() function
 - Or create tables manually in Neon SQL Editor
 
@@ -472,6 +478,7 @@ curl -X DELETE http://localhost:8000/users/1
 
 **Fix:**
 Add to `package.json`:
+
 ```json
 {
   "type": "module"
@@ -483,8 +490,9 @@ Add to `package.json`:
 **Cause:** Unhandled promise rejection
 
 **Fix:** Always use try/catch in async routes:
+
 ```javascript
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     // database operations
   } catch (error) {
@@ -498,6 +506,7 @@ router.get('/', async (req, res) => {
 **Cause:** Missing express.json() middleware
 
 **Fix:**
+
 ```javascript
 app.use(express.json()); // Add this before routes
 ```
@@ -524,4 +533,4 @@ After mastering Neon:
 
 ---
 
-*Happy Coding! 🚀*
+_Happy Coding! 🚀_

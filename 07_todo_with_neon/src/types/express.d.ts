@@ -1,9 +1,9 @@
-import { TokenPayload } from "../shared/utils/jwt.ts"
+import { TokenPayload } from "../shared/utils/jwt.ts";
 
 declare global {
-    namespace Express {
-        interface Request {
-            user? : TokenPayload
-        }
+  namespace Express {
+    interface Request {
+      user?: TokenPayload;
     }
+  }
 }

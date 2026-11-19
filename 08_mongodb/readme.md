@@ -125,9 +125,10 @@ app.use(helmet());
 export default app;
 ```
 
-
 ### Step 6: User Interface
+
 Create
+
 > modules/user/user.interface.ts
 
 ```
@@ -139,7 +140,9 @@ export interface IUser {
 ```
 
 ### Step 7: User Model
-Create: 
+
+Create:
+
 > modules/user/user.model.ts
 
 ```
@@ -171,9 +174,10 @@ const userSchema = new mongoose.Schema<IUser>(
 export const UserModel = mongoose.model<IUser>("User", userSchema);
 ```
 
-
 ### Step 8: Repository Layer
+
 create
+
 > user.repository.ts
 
 ```
@@ -217,8 +221,8 @@ export const deleteUserRepository = async (
 
 ```
 
-
 ### Step 9: Service Layer
+
 Business Logic goes here
 
 ```
@@ -258,9 +262,8 @@ export const deleteUserService = async (
 };
 ```
 
-
-
 ### Step 10: Controller Layer
+
 ```
 import { Request, Response } from "express";
 import * as userService from "./user.service";
@@ -324,7 +327,6 @@ export const deleteUserController = async (
 };
 ```
 
-
 ### Step 11: Routes
 
 ```
@@ -346,8 +348,8 @@ router.delete("/:id", userController.deleteUserController);
 export default router;
 ```
 
-
 ### Step 12: Mount Route
+
 inside `app.ts`
 
 ```

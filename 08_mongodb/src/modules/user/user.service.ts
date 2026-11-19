@@ -5,7 +5,6 @@ import { hashPassword } from "../../shared/utils/hash";
 export const createUserService = async (payload: IUser) => {
   const { name, email, password, age } = payload;
 
-
   return userRepository.createUserRepository({
     name,
     email,
@@ -14,12 +13,14 @@ export const createUserService = async (payload: IUser) => {
   });
 };
 
+export const loginUserService = async (payload: {
+  email: string;
+  password: string;
+}) => {
+  const { email, password } = payload;
 
-export const loginUserService = async (payload: {email: string, password : string}) => {
-    const {email, password} = payload
-
-    return userRepository.loginUserRepository(email, password)
-}
+  return userRepository.loginUserRepository(email, password);
+};
 
 export const getAllUserService = async () => {
   return userRepository.getAllUserRepository();

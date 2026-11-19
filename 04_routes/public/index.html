@@ -1,24 +1,23 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Testing post request</title>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Hey I am the file</h1>
     <script>
-        
-        const testpost = async () => {
-            const res = await fetch('/', {
-                method : "POST"
-            })
+      const testpost = async () => {
+        const res = await fetch("/", {
+          method: "POST",
+        });
 
-            const result = await res.text();
-            console.log("Hello to the POST request on the front end side")
-        }
+        const result = await res.text();
+        console.log("Hello to the POST request on the front end side");
+      };
 
-        testpost()
+      testpost();
     </script>
-</body>
+  </body>
 </html>
