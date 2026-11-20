@@ -1,328 +1,139 @@
-# Node.js & Express.js - Learning Notes
+# Learn Node.js and Express
 
-## Prerequisites
+This repository is a hands-on path from basic Node.js concepts to building APIs with Express, authentication, and databases. Work through the folders in order; each folder is a small learning project.
 
-Before starting, you should know:
+For the step-by-step backend engineering curriculum, start with the [documentation guide index](-01_docs/README.md).
 
-- ✅ JavaScript basics (variables, functions, async/await)
-- ✅ How to use the terminal/command line
-- ✅ JSON format
+## Before you start
 
-## What is Node.js?
+You should be comfortable with JavaScript basics, including functions, objects, promises, and `async`/`await`, and know how to use a terminal. Install a current Node.js LTS release and npm.
 
-**Node.js** lets you run JavaScript on your computer/server, not just in the browser.
-
-Think of it like this:
-
-- **Browser JavaScript** = Controls what you see on a webpage
-- **Node.js** = Controls the server, files, databases
-
-### Quick Comparison
-
-| Feature           | Browser JS | Node.js           |
-| ----------------- | ---------- | ----------------- |
-| Can access DOM?   | ✅ Yes     | ❌ No             |
-| Can read files?   | ❌ No      | ✅ Yes            |
-| Can make servers? | ❌ No      | ✅ Yes            |
-| Has `fetch()`?    | ✅ Yes     | ✅ Yes (built-in) |
-
-## Creating a Node.js Project
-
-### Step 1: Create a folder
+To run a folder's project, move into it, install its dependencies, and follow that folder's README or entry point. For example:
 
 ```bash
-mkdir my-project
-cd my-project
-```
-
-### Step 2: Initialize Node.js
-
-```bash
-npm init -y
-```
-
-This creates `package.json` - a file that tracks your project settings and dependencies.
-
-### Step 3: Run JavaScript
-
-Create `index.js`:
-
-```javascript
-console.log("Hello from Node.js!");
-```
-
-Run it:
-
-```bash
+cd 03_express
+npm install
 node index.js
 ```
 
-## What is Express.js?
+The projects may use different entry points and scripts, so check each folder's `package.json` before running it.
 
-**Express** is a framework that makes creating web servers easier.
+## Learning path
 
-Without Express:
+| Folder | Topics |
+| --- | --- |
+| `01_starting` | Running JavaScript with Node.js and starting a project |
+| `02_filehandler` | Working with files, paths, and promises |
+| `03_express` | Creating a basic Express server and serving static files |
+| `04_routes` | Organizing routes and serving a public page |
+| `05_middleware` | Middleware and request handling |
+| `06_simple-crud` | A first create, read, update, and delete API |
+| `07_todo_with_neon` | A todo API with authentication and Prisma-backed Neon data |
+| `08_mongodb` | An API organized into modules and backed by MongoDB |
 
-```javascript
-// Using native Node.js http module (verbose!)
-import { createServer } from "node:http";
-const server = createServer((req, res) => {
-  if (req.url === "/") {
-    res.end("Home");
-  } else if (req.url === "/about") {
-    res.end("About");
-  }
-});
-server.listen(3000);
-```
+The later projects build on earlier ideas. Read their local notes and inspect the code as you go; the table is a guide, not a promise that every production topic is covered in each project.
 
-With Express:
+## Node.js and Express in a nutshell
 
-```javascript
+Node.js runs JavaScript outside the browser. It gives your program access to server-side capabilities such as files, networking, and database clients. Express is a Node.js framework for handling HTTP requests and building web servers and APIs.
+
+```js
 import express from "express";
+
 const app = express();
+const port = 3000;
 
-app.get("/", (req, res) => res.send("Home"));
-app.get("/about", (req, res) => res.send("About"));
+app.use(express.json()); // Parse JSON request bodies before routes run.
 
-app.listen(3000);
-```
-
-Much cleaner!
-
-## Creating an Express Project
-
-### Step 1: Initialize project
-
-```bash
-npm init -y
-```
-
-### Step 2: Install Express
-
-```bash
-npm install express
-```
-
-This downloads Express and saves it in `node_modules/`.
-
-### Step 3: Create server file
-
-`index.js`:
-
-```javascript
-import express from "express";
-const app = express();
-const PORT = 3000;
-
-// Route
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.json({ message: "Hello from Express" });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+app.listen(port, () => {
+  console.log(`Server listening on http://localhost:${port}`);
 });
 ```
 
-### Step 4: Add "type": "module" to package.json
+This example uses ES modules. In a project's `package.json`, set `"type": "module"` to use `import` in `.js` files, or use the module format already chosen by that project.
 
-Your `package.json` should look like:
+## Core Express concepts
 
-```json
-{
-  "name": "my-project",
-  "version": "1.0.0",
-  "type": "module",
-  "dependencies": {
-    "express": "^4.x.x"
-  }
-}
-```
+### Requests and responses
 
-The `"type": "module"` lets you use `import` instead of `require()`.
+- `req.method` and `req.path` describe the HTTP method and URL path.
+- `req.params` contains values from route patterns such as `/users/:id`.
+- `req.query` contains URL query values such as `?page=2`.
+- `req.body` contains parsed request data when the matching body-parsing middleware is installed. Use `express.json()` for JSON and `express.urlencoded({ extended: true })` for form submissions.
+- `req.headers` contains the request headers.
+- `res.status(code)`, `res.json(data)`, `res.send(data)`, and `res.redirect(path)` help create a response.
 
-### Step 5: Run it
-
-```bash
-node index.js
-```
-
-Then open `http://localhost:3000` in your browser!
-
-## Basic Express Concepts
-
-### Request (req) Object
-
-Information about the incoming request:
-
-| Property      | What It Is                                    |
-| ------------- | --------------------------------------------- |
-| `req.method`  | HTTP method: GET, POST, PUT, DELETE           |
-| `req.path`    | URL path: "/", "/about", etc.                 |
-| `req.params`  | URL parameters: `/user/:id` → `req.params.id` |
-| `req.query`   | Query string: `?name=john` → `req.query.name` |
-| `req.body`    | Request body (for POST requests)              |
-| `req.headers` | HTTP headers                                  |
-
-### Response (res) Object
-
-Methods to send responses:
-
-| Method                 | What It Does             |
-| ---------------------- | ------------------------ |
-| `res.send("text")`     | Sends text or HTML       |
-| `res.json({ data })`   | Sends JSON response      |
-| `res.status(404)`      | Sets HTTP status code    |
-| `res.redirect("/url")` | Redirects to another URL |
-
-### Route Examples
-
-```javascript
-// GET request
-app.get("/users", (req, res) => {
-  res.json({ users: ["Alice", "Bob"] });
-});
-
-// POST request
-app.post("/users", (req, res) => {
-  res.status(201).json({ message: "User created" });
-});
-
-// URL Parameters
+```js
 app.get("/users/:id", (req, res) => {
-  const userId = req.params.id;
-  res.json({ userId });
+  res.json({ userId: req.params.id, page: req.query.page ?? "1" });
 });
 
-// Query Parameters
-// URL: /search?q=nodejs
-app.get("/search", (req, res) => {
-  const searchTerm = req.query.q;
-  res.json({ searchingFor: searchTerm });
+app.post("/users", (req, res) => {
+  res.status(201).json({ user: req.body });
 });
 ```
 
----
+For a real API, validate `req.body` and other user input before using it. Do not treat client-provided data as trusted.
 
-# Express Middleware - Deep Dive
+### Middleware and order
 
-## What is Middleware?
+Middleware runs in the order it is registered. A middleware function can inspect or change the request, send a response, pass control onward with `next()`, or pass an error with `next(error)`.
 
-Think of middleware like **security guards at a building entrance**:
-
-- Every visitor (request) must pass through the guards (middleware)
-- Guards can:
-  - **Check ID** (authentication)
-  - **Write in a logbook** (logging)
-  - **Add a visitor badge** (modifying the request)
-  - **Stop suspicious people** (blocking requests)
-  - **Say "you may enter"** (calling `next()`)
-
-## The Pattern
-
-```javascript
-const middleware = (req, res, next) => {
-  // Do something before the route handler
-  console.log("Before next()");
-
-  next(); // Pass to next middleware or route
-
-  // Do something AFTER the route handler finishes
-  console.log("After next()");
-};
-```
-
-## Key Rule: Order Matters!
-
-Middleware runs in the order you write them:
-
-```
-Request comes in
-    ↓
-Middleware 1 (before next)
-    ↓
-Middleware 2 (before next)
-    ↓
-Middleware 3 (before next)
-    ↓
-Route Handler (sends response)
-    ↓
-Middleware 3 (after next) ← runs BACKWARDS!
-    ↓
-Middleware 2 (after next)
-    ↓
-Middleware 1 (after next)
-```
-
-## Real-Life Example
-
-Like a **restaurant visit**:
-
-1. **Host** takes your name (logger middleware)
-2. **Waiter** seats you (auth middleware)
-3. **Chef** cooks food (route handler)
-4. **Waiter** brings bill (after next)
-5. **Host** says goodbye (after next)
-
-## Common Built-in Middleware
-
-| Middleware             | What It Does                   |
-| ---------------------- | ------------------------------ |
-| `express.json()`       | Reads JSON from request body   |
-| `express.static()`     | Serves files (images, CSS, JS) |
-| `express.urlencoded()` | Reads form data                |
-
-## Attaching Data to Request
-
-You can add custom data to `req` that later middleware/routes can use:
-
-```javascript
-const authMiddleware = (req, res, next) => {
-  // Attach user to request
-  req.user = { id: 123, name: "Mustafa", role: "admin" };
+```js
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
   next();
-};
-
-app.use(authMiddleware);
+});
 
 app.get("/", (req, res) => {
-  // Access the user we attached
-  res.send(`Hello ${req.user.name}!`);
+  res.send("Home");
 });
 ```
 
-## Error Handling Middleware
+Calling `next()` starts the next matching middleware or route. Code immediately after `next()` runs right away; it does not wait for downstream handlers to finish. Put middleware that should run before a route above that route. Put error-handling middleware after routes.
 
-Special middleware with 4 parameters:
+Express has built-in middleware such as `express.json()`, `express.urlencoded()`, and `express.static()`. Use only the middleware your application needs, and understand what data it accepts or exposes.
 
-```javascript
-// Must have 4 parameters!
+### Errors
+
+An Express error handler has four parameters and is registered after routes:
+
+```js
 app.use((err, req, res, next) => {
-  console.error(err.message);
-  res.status(500).json({ error: "Something broke!" });
+  console.error(err);
+  res.status(500).json({ message: "Internal server error" });
 });
 ```
 
----
+In a real application, return useful client errors for expected cases, keep internal details out of public responses, and log enough context on the server to investigate failures. Follow the async error-handling approach supported by the Express version used in your project.
 
-## Quick Commands Reference
+## What to learn as you build APIs
+
+Use the later projects to practice these backend engineering skills:
+
+1. **Design routes and responses:** choose clear resource URLs, HTTP methods, and status codes; keep response shapes consistent.
+2. **Validate input:** check request data at the boundary and return clear `400` responses for invalid input.
+3. **Structure the code:** keep routing, request handling, business logic, and data access understandable as the app grows.
+4. **Work with data safely:** model relationships and constraints, use database operations carefully, and handle missing or conflicting records.
+5. **Handle identity and access:** hash passwords with a suitable password-hashing library, authenticate users, and check authorization for every protected action.
+6. **Configure the app:** read secrets and environment-specific settings from environment variables; never commit real credentials.
+7. **Improve reliability:** add useful logs, automated tests for important behavior, and clear setup instructions.
+8. **Prepare for deployment:** use secure settings, handle process shutdown and database connections, and deploy with environment-specific configuration.
+
+These are topics to learn and verify, not guarantees that every example in this repository is production-ready. Review each project before using its patterns in a deployed service.
+
+## Useful commands
+
+Run these from the relevant project folder:
 
 ```bash
-# Initialize project
-npm init -y
-
-# Install package
-npm install express
-
-# Run server
-node index.js
-
-# Test with curl
-curl http://localhost:3000/
+npm install          # Install dependencies listed by the project
+node index.js        # Run this entry point if the project uses it
+npm run              # List scripts defined in package.json
 ```
 
----
-
-_Learning Progress: 007 - Middleware Deep Dive_
-_Folder: /Users/yasirhayat/workspace/learn-nodejs/007_
+The entry point and available scripts vary by folder. Check `package.json` and the folder's notes.
